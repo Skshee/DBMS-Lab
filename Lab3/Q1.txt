@@ -1,0 +1,139 @@
+create table Person(
+  2  driver_id varchar(30),
+  3  name varchar(30),
+  4  address varchar(100),
+  5  primary key(driver_id));
+
+Select table_name from user_tables;
+
+create table Car(
+    regno varchar(30),
+    model varchar(30),
+    Year int,
+    primary key(regno));
+
+create table Accident(
+    report_number int,
+    accd_date date,
+    location varchar(50),
+    primary key(report_number));
+
+create table Owns(
+    driver_id varchar(30),
+    regno varchar(20),
+    foreign key (driver_id) references Person,
+    foreign key (regno) references Car);
+
+create table Participated(
+    driver_id varchar(30),
+    regno varchar(20),
+    report_number int,
+    damage_amount int,
+    foreign key (driver_id) references Person,
+    foreign key (regno) references Car,
+    foreign key (report_number) references Accident);
+
+
+
+2)  insert into Person values (18, 'Samuel', 'Earth');
+ 
+ insert into Car values (230953395, 'Lamborghini', 2019);
+
+ insert into Accident values (2, '9-Sep-2001', 'New York');
+
+ insert into Participated values (230953374, 991, 12, 50000);
+
+ insert into Owns values (18, 123);
+
+
+3) update Participated
+set damage_amount = 25000
+where report_number = 12;
+
+
+4) delete from Participated where report_number=(select report_number from Accident where extract(year from accd_date)=2001);
+
+1 row deleted.
+
+5) alter table Car add Mileage int;
+   Table altered.
+   alter table Car drop column Mileage;
+   Table altered.
+
+6) alter table Participated
+   add constraint damagechecker check(damage_amount > 1000);
+   Table altered.
+
+
+
+
+Table Outputs
+ 1- select * from Person;
+
+DRIVER_ID                      NAME
+------------------------------ ------------------------------
+ADDRESS
+--------------------------------------------------------------------------------
+230953374                      Saurabh
+Manipal
+
+230953390                      Armaan
+Manipal
+
+230953395                      Gokul
+Manipal
+
+
+DRIVER_ID                      NAME
+------------------------------ ------------------------------
+ADDRESS
+--------------------------------------------------------------------------------
+7                              Penaldo
+Saudi
+
+18                             Samuel
+Earth
+
+2-  select * from Car;
+
+REGNO                          MODEL                                YEAR
+------------------------------ ------------------------------ ----------
+234                            Ferrari                              2025
+123                            Honda                                2018
+890                            Swift                                2025
+991                            Innova                               2025
+51                             Creta                                2025
+999                            Chiron                               2025
+333                            Mustang                              1979
+450                            Aston Martin                         2019
+
+8 rows selected.
+
+3 - select * from Accident;
+
+REPORT_NUMBER ACCD_DATE LOCATION
+------------- --------- --------------------------------------------------
+           12 21-JAN-25 Tiger Circle
+           13 22-JAN-25 MIT
+            9 19-JAN-25 Udupi
+            8 17-JAN-25 Marena
+            2 09-SEP-01 New York
+
+4 -  select * from Owns;
+
+DRIVER_ID                      REGNO
+------------------------------ --------------------
+230953374                      991
+7                              999
+230953390                      234
+18                             123
+230953395                      450
+
+5 - select * from Participated;
+
+DRIVER_ID                      REGNO                REPORT_NUMBER DAMAGE_AMOUNT
+------------------------------ -------------------- ------------- -------------
+230953374                      991                             12         25000
+230953395                      890                             13         30000
+7                              999                              9       3000000
+18                             123                              8         12500
