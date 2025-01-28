@@ -1,0 +1,42 @@
+ 1) select count (distinct driver_id)
+    from Participated natural join Owns
+    where report_number in (select a.report_number
+    from Accident a
+    where extract (year from accd_date)=2008);
+
+COUNT(DISTINCTDRIVER_ID)
+------------------------
+                       2
+
+2) select count(report_number), model from Participated natural join Car group by model;
+
+COUNT(REPORT_NUMBER) MODEL
+-------------------- ------------------------------
+                   1 Honda
+                   1 Creta
+                   1 Swift
+                   2 Innova
+                   1 Chiron
+
+3) select name as owner_name, count(distinct driver_id), sum(damage_amount) as total_damage from Person natural join Participated group by (name) order by (total_damage) desc;
+
+OWNER_NAME                     COUNT(DISTINCTDRIVER_ID) TOTAL_DAMAGE
+------------------------------ ------------------------ ------------
+Penaldo                                               1      3075000
+Armaan                                                1       900000
+Gokul                                                 1        80000
+Samuel                                                1        62500
+
+4) select name,extract(year from accd_date) as year,count(report_number) as total_accidents from Person natural join Participated join Accident using (report_number) group by(name, extract (year from accd_date)) having count(driver_id) >=
+2;
+
+NAME                                 YEAR TOTAL_ACCIDENTS
+------------------------------ ---------- ---------------
+Penaldo                              2025               2
+
+5) select name from Person
+   where driver_id not in(select driver_id from Participated);
+  
+   NAME
+------------------------------
+Saurabh
