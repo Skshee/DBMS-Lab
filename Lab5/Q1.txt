@@ -1,0 +1,235 @@
+i)  create table student(
+  2  regno varchar(20),
+  3  name varchar(50),
+  4  major varchar(20),
+  5  bdate date,
+  6  primary key(regno));
+
+create table course(
+  2  course# int,
+  3  cname varchar(30),
+  4  dept varchar(30),
+  5  primary key (course#));
+
+ create table enroll(
+  2  regno varchar(20),
+  3  course# int,
+  4  sem int,
+  5  book_isbn int,
+  6  primary key (regno,course#),
+  7  foreign key (regno) references student,
+  8  foreign key (course#) references course);
+
+ create table book_adoption(
+  2  course# int,
+  3  sem int,
+  4  book_isbn int,
+  5  primary key (course#,book_isbn),
+  6  foreign key (course#) references course);
+
+ create table text(
+  2  book_isbn int,
+  3  bookTitle varchar(50),
+  4  publisher varchar(50),
+  5  author varchar(50),
+  6  primary key (book_isbn));
+
+ii) insert into student values ('123','Madhav','CCE','10-Feb-2004');
+
+1 row created.
+
+SQL> insert into student values ('222','Achal','EEE','15-Mar-2004');
+
+1 row created.
+
+SQL> insert into student values ('234','Misha','AI/ML','27-Oct-2004');
+
+1 row created.
+
+SQL> insert into student values ('999','Suvan','CCE','9-Jan-2005');
+
+1 row created.....
+
+--STUDENT TABLE--
+ select * from student;
+
+REGNO                NAME
+-------------------- --------------------------------------------------
+MAJOR                BDATE
+-------------------- ---------
+111                  Gokul
+CCE                  12-FEB-05
+
+123                  Madhav
+CCE                  10-FEB-04
+
+222                  Achal
+EEE                  15-MAR-04
+
+
+REGNO                NAME
+-------------------- --------------------------------------------------
+MAJOR                BDATE
+-------------------- ---------
+234                  Misha
+AI/ML                27-OCT-05
+
+999                  Suvan
+CCE                  09-JAN-05
+
+777                  Jashan
+CSE                  25-JUN-04
+
+
+REGNO                NAME
+-------------------- --------------------------------------------------
+MAJOR                BDATE
+-------------------- ---------
+911                  Saurabh
+Civil                13-NOV-05
+
+ insert into text values (7890,'Basics Of SQL','ABC','James');
+
+1 row created.
+
+SQL> insert into text values (6543,'Learning Linux','XYZ','Jeff');
+
+1 row created.
+
+SQL> insert into text values (3456,'Regression Models','SKS','Andrew NG');
+
+1 row created.
+
+SQL> insert into text values (2244,'Boolean Algebra','SKS','Sunil');
+
+1 row created.
+
+SQL> insert into text values (9955,'Formal Language Theory','FLAT','MJ');
+
+1 row created.
+
+SQL> select * from text;
+
+ BOOK_ISBN BOOKTITLE
+---------- --------------------------------------------------
+PUBLISHER
+--------------------------------------------------
+AUTHOR
+--------------------------------------------------
+      7890 Basics Of SQL
+ABC
+James
+
+      6543 Learning Linux
+XYZ
+Jeff
+
+ BOOK_ISBN BOOKTITLE
+---------- --------------------------------------------------
+PUBLISHER
+--------------------------------------------------
+AUTHOR
+--------------------------------------------------
+
+      3456 Regression Models
+SKS
+Andrew NG
+
+      2244 Boolean Algebra
+SKS
+
+ BOOK_ISBN BOOKTITLE
+---------- --------------------------------------------------
+PUBLISHER
+--------------------------------------------------
+AUTHOR
+--------------------------------------------------
+Sunil
+
+      9955 Formal Language Theory
+FLAT
+MJ
+
+
+--Enroll--
+REGNO                   COURSE#        SEM  BOOK_ISBN
+-------------------- ---------- ---------- ----------
+111                        2101          4       7890
+123                        9231          4       6543
+999                        9231          4       6543
+234                        1230          4       9955
+777                        4545          5       3456
+
+--Book Adoption--
+   COURSE#        SEM  BOOK_ISBN
+---------- ---------- ----------
+      2101          4       7890
+      9231          4       6543
+      8900          3       2244
+      4545          5       3456
+      1230          3       9955
+      9231          5       9123
+      4545          6       5153
+
+iii) a)
+    select cname,count(course#) as no_of_books
+    from course natural join book_adoption
+    group by cname
+    having count(course#)>1;
+
+CNAME                          NO_OF_BOOKS
+------------------------------ -----------
+ML                                       2
+OS                                       2
+
+c) select name
+    from student
+    where regno in (
+    select regno
+    from enroll natural join course
+    group by regno
+    having count (distinct dept)>1);
+NAME
+--------------------------------------------------
+Suvan
+
+d)select name
+    from student
+    where regno not in (
+    select regno
+    from enroll);
+
+NAME
+--------------------------------------------------
+Achal
+Saurabh
+
+e) select dept
+    from course
+    where not exists(
+    select * from book_adoption natural join text
+    where publisher = 'SKS'
+    and course.course# = book_adoption.course);
+
+f) select bookTitle
+    from text
+    where book_isbn in (
+    select distinct book_isbn
+    from book_adoption join enroll using(book_isbn));
+
+BOOKTITLE
+--------------------------------------------------
+Basics Of SQL
+Learning Linux
+Regression Models
+Formal Language Theory
+
+h) select regno, name, count(book_isbn)
+    from enroll natural join student
+    group by regno, name having count(book_isbn)>=all
+    (select count(book_isbn)
+    from enroll natural join student
+    group by regno);
+
+
+
