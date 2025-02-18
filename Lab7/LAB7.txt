@@ -1,0 +1,119 @@
+CREATE OR REPLACE TRIGGER trg_display_driver_info
+AFTER INSERT ON participated
+FOR EACH ROW
+DECLARE
+    v_driver_name VARCHAR2(100);
+    v_driver_address VARCHAR2(255);
+BEGIN
+    SELECT NAME, ADDRESS
+    INTO v_driver_name, v_driver_address
+    FROM person
+    WHERE DRIVER_ID = :NEW.DRIVER_ID;
+
+    DBMS_OUTPUT.PUT_LINE('Driver ID: ' || :NEW.DRIVER_ID);
+    DBMS_OUTPUT.PUT_LINE('Driver Name: ' || v_driver_name);
+    DBMS_OUTPUT.PUT_LINE('Driver Address: ' || v_driver_address);
+    DBMS_OUTPUT.PUT_LINE('Car Registration Number: ' || :NEW.REGNO);
+    DBMS_OUTPUT.PUT_LINE('Report Number: ' || :NEW.REPORT_NUMBER);
+    DBMS_OUTPUT.PUT_LINE('Damage Amount: ' || :NEW.DAMAGE_AMOUNT);
+END;
+/
+
+INSERT INTO participated (DRIVER_ID#, REGNO, REPORT_NUMBER, DAMAGE_AMOUNT)
+   VALUES (1235, 'EFGH2001', 3, 5000);
+
+ CREATE OR REPLACE TRIGGER trg_display_driver_info
+  2  AFTER INSERT ON participated
+  3  FOR EACH ROW
+  4  DECLARE
+  5      v_driver_name VARCHAR2(100);
+  6      v_driver_address VARCHAR2(255);
+  7  BEGIN
+  8      SELECT NAME, ADDRESS
+  9      INTO v_driver_name, v_driver_address
+ 10      FROM person
+ 11      WHERE DRIVER_ID = :NEW.DRIVER_ID;
+ 12
+ 13      DBMS_OUTPUT.PUT_LINE('Driver ID: ' || :NEW.DRIVER_ID);
+ 14      DBMS_OUTPUT.PUT_LINE('Driver Name: ' || v_driver_name);
+ 15      DBMS_OUTPUT.PUT_LINE('Driver Address: ' || v_driver_address);
+ 16      DBMS_OUTPUT.PUT_LINE('Car Registration Number: ' || :NEW.REGNO);
+ 17      DBMS_OUTPUT.PUT_LINE('Report Number: ' || :NEW.REPORT_NUMBER);
+ 18      DBMS_OUTPUT.PUT_LINE('Damage Amount: ' || :NEW.DAMAGE_AMOUNT);
+ 19  END;
+ 20  /
+
+Trigger created.
+
+INSERT INTO Participated (driver_id, REGNO, REPORT_NUMBER, DAMAGE_AMOUNT) values (18, 51, 44, 50000);
+Driver ID: 18
+Driver Name: Samuel
+Driver Address: Earth
+Car Registration Number: 51
+Report Number: 44
+Damage Amount: 50000
+
+2. 
+
+CREATE OR REPLACE TRIGGER update_total_damage
+  2  AFTER INSERT OR DELETE ON PARTICIPATED
+  3  FOR EACH ROW
+  4  BEGIN
+  5    IF INSERTING THEN
+  6      UPDATE ACCIDENT
+  7      SET total_damage = total_damage + :NEW.damage_amount
+  8      WHERE report_number = :NEW.report_number;
+  9    ELSIF DELETING THEN
+ 10      UPDATE ACCIDENT
+ 11      SET total_damage = total_damage - :OLD.damage_amount
+ 12      WHERE report_number = :OLD.report_number;
+ 13    END IF;
+ 14  END;
+ 15
+ 16  /
+
+Trigger created.
+
+3.
+
+ select p.regno, SUM(p.damage_amount) as TOTAL_DAMAGE
+  2  from Participated p
+  3  group by p.regno
+  4  having sum(damage_amount)>10000;
+
+REGNO                TOTAL_DAMAGE
+-------------------- ------------
+991                        950000
+890                         30000
+999                       3075000
+123                         12500
+51                         100000
+
+
+
+4.select p.regno, count(p.report_number) as TOTAL_ACCIDENTS,sum(p.damage_amount) AS TOTAL_DAMAGE
+  2  from Participated p
+  3  group by p.regno
+  4  having count(p.report_number) > 1;
+
+REGNO                TOTAL_ACCIDENTS TOTAL_DAMAGE
+-------------------- --------------- ------------
+991                                2       950000
+999                                2      3075000
+51                                 2       100000
+
+5.
+
+ select avg(p.damage_amount) as AVG_DAMAGE, a.location as LOCATION
+  2  from Participated p natural join Accident a
+  3  group by a.location;
+
+AVG_DAMAGE LOCATION
+---------- --------------------------------------------------
+     50000 Paris
+     75000 Tiger Circle
+     12500 Marena
+   3000000 Udupi
+     50000 Mumbai
+    900000 Jammu
+     30000 MIT
